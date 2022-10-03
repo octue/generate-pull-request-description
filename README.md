@@ -29,10 +29,13 @@ steps:
 - name: Update pull request body
   uses: riskledger/update-pr-description@v2
   with:
-    body: ${{ env.RELEASE_NOTES }}
+    body: ${{ env.PULL_REQUEST_DESCRIPTION }}
     token: ${{ secrets.GITHUB_TOKEN }}
-
 ```
+
+The generated description is available from the environment variable `PULL_REQUEST_DESCRIPTION` instead of as an output
+of the action (`::set-output...` only works with single-line outputs). It's accessible from
+`${{ env.PULL_REQUEST_DESCRIPTION }}` at any point in the workflow job it was used in.
 
 ### CLI
 ```shell
