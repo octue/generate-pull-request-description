@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "generate-pull-request-description"
-version = "1.0.0"
+version = "1.0.0.beta-0"
 description = "A GitHub action that summarises the commits in a pull request for its description."
 authors = ["Marcus Lugg <marcus@octue.com>"]
 readme = "README.md"
