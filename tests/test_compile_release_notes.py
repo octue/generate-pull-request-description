@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from generate_pull_request_description.compile_release_notes import ReleaseNotesCompiler, main
+from generate_pull_request_description.generate_pull_request_description import PullRequestDescriptionGenerator, main
 
 
 MOCK_GIT_LOG = [
@@ -43,17 +43,21 @@ EXPECTED_PULL_REQUEST_START_RELEASE_NOTES_WITH_NON_GENERATED_SECTION = "\n".join
 )
 
 
-class TestReleaseNotesCompiler(unittest.TestCase):
-    GIT_LOG_METHOD_PATH = "generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler._get_git_log"
+class TestPullRequestDescriptionGenerator(unittest.TestCase):
+    GIT_LOG_METHOD_PATH = (
+        "generate_pull_request_description.generate_pull_request_description.PullRequestDescriptionGenerator"
+        "._get_git_log"
+    )
     GET_CURRENT_PULL_REQUEST_PATH = (
-        "generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler._get_current_pull_request"
+        "generate_pull_request_description.generate_pull_request_description.PullRequestDescriptionGenerator"
+        "._get_current_pull_request"
     )
     MOCK_PULL_REQUEST_URL = "https://api.github.com/repos/blah/my-repo/pulls/11"
 
     def test_unsupported_stop_point_results_in_error(self):
         """Test that using an unsupported stop point results in a ValueError."""
         with self.assertRaises(ValueError):
-            ReleaseNotesCompiler(stop_point="blah", pull_request_url="")
+            PullRequestDescriptionGenerator(stop_point="blah", pull_request_url="")
 
     def test_skip_release_notes_auto_generation(self):
         """Test that release notes autogeneration is skipped if the skip indicator is present in the previous notes."""
@@ -66,21 +70,21 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(release_notes, previous_notes)
 
     def test_last_release_stop_point(self):
         """Test generating release notes that stop at the last release."""
         with patch(self.GIT_LOG_METHOD_PATH, return_value=MOCK_GIT_LOG):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE",
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -105,11 +109,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": "BLAH BLAH BLAH", "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -144,11 +148,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(release_notes, EXPECTED_PULL_REQUEST_START_RELEASE_NOTES_WITH_NON_GENERATED_SECTION)
 
@@ -164,11 +168,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(release_notes, EXPECTED_PULL_REQUEST_START_RELEASE_NOTES_WITH_NON_GENERATED_SECTION)
 
@@ -182,11 +186,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -219,11 +223,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(release_notes, EXPECTED_PULL_REQUEST_START_RELEASE_NOTES_WITH_NON_GENERATED_SECTION)
 
@@ -232,7 +236,7 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         mock_git_log = ["fabd2ab|§This is not in the right format|§|§", "27dcef0|§FIX: Fix a bug|§|§"]
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(stop_point="LAST_RELEASE").compile_release_notes()
+            release_notes = PullRequestDescriptionGenerator(stop_point="LAST_RELEASE").generate()
 
         expected = "\n".join(
             [
@@ -260,7 +264,7 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         ]
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(stop_point="LAST_RELEASE").compile_release_notes()
+            release_notes = PullRequestDescriptionGenerator(stop_point="LAST_RELEASE").generate()
 
         expected = "\n".join(
             [
@@ -283,9 +287,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         self.assertEqual(release_notes, expected)
 
     def test_updating_release_notes_works_and_does_not_add_extra_newlines_after_autogenerated_section(self):
-        """Test that updating release notes that were produced by the release notes compiler previously works (i.e. the
-        new commits are categorised and formatted properly) and does not add extra newlines under the autogenerated
-        section.
+        """Test that updating release notes that were produced by the pull request description generator previously
+        works (i.e. the new commits are categorised and formatted properly) and does not add extra newlines under the
+        autogenerated section.
         """
         previous_notes = (
             "BLAH BLAH BLAH\n<!--- START AUTOGENERATED NOTES ---><!--- END AUTOGENERATED NOTES --->YUM YUM YUM"
@@ -295,25 +299,25 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": previous_notes, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes_1 = ReleaseNotesCompiler(
+            release_notes_1 = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         # Add a new commit to the git log.
         updated_pull_request_commits = [{"commit": {"message": "FIX: Fix a bug"}}] + MOCK_PULL_REQUEST_COMMITS
 
-        # Run the compiler on the new git log to update the previous set of release notes.
+        # Run the generator on the new git log to update the previous set of release notes.
         with patch(
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": release_notes_1, "commits": updated_pull_request_commits},
         ):
-            release_notes_2 = ReleaseNotesCompiler(
+            release_notes_2 = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=self.MOCK_PULL_REQUEST_URL,
                 include_link_to_pull_request=False,
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -368,9 +372,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         ]
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         expected_release_notes = "\n".join(
             [
@@ -422,9 +426,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         ]
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         expected_release_notes = "\n".join(
             [
@@ -449,9 +453,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         ]
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         expected_release_notes = "\n".join(
             [
@@ -474,9 +478,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         mock_git_log = ["fabd2ab|§ENH: Make big change|§BREAKING CHANGE: blah blah blah|§"] + MOCK_GIT_LOG
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(
             release_notes,
@@ -520,9 +524,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         ] + MOCK_GIT_LOG
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         self.assertEqual(
             release_notes,
@@ -576,13 +580,13 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         )
 
     def test_commit_messages_with_multi_line_bodies(self):
-        """Test that commits with multi-line bodies work with the release notes compiler."""
+        """Test that commits with multi-line bodies work with the pull request description generator."""
         mock_git_log = ["fabd2ab|§ENH: Blah blah|§This is the body.\n Here is another body line|§"] + MOCK_GIT_LOG
 
         with patch(self.GIT_LOG_METHOD_PATH, return_value=mock_git_log):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="LAST_RELEASE", include_link_to_pull_request=False
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -612,11 +616,11 @@ class TestReleaseNotesCompiler(unittest.TestCase):
             self.GET_CURRENT_PULL_REQUEST_PATH,
             return_value={"body": "", "number": 40, "html_url": html_url, "commits": MOCK_PULL_REQUEST_COMMITS},
         ):
-            release_notes = ReleaseNotesCompiler(
+            release_notes = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url="https://api.github.com/repos/octue/conventional-commits/pulls/40",
                 include_link_to_pull_request=True,
-            ).compile_release_notes()
+            ).generate()
 
         expected = "\n".join(
             [
@@ -645,7 +649,7 @@ class TestReleaseNotesCompiler(unittest.TestCase):
         with patch(self.GIT_LOG_METHOD_PATH, return_value=MOCK_GIT_LOG):
             with patch("requests.get", return_value=Mock(status_code=404)):
                 with self.assertLogs() as logging_context:
-                    compiler = ReleaseNotesCompiler(
+                    generator = PullRequestDescriptionGenerator(
                         stop_point="PULL_REQUEST_START",
                         pull_request_url="https://api.github.com/repos/octue/conventional-commits/pulls/40",
                         include_link_to_pull_request=True,
@@ -654,9 +658,9 @@ class TestReleaseNotesCompiler(unittest.TestCase):
                     self.assertEqual(logging_context.records[0].levelname, "WARNING")
                     self.assertEqual(logging_context.records[1].message, "Using 'LAST_RELEASE' stop point.")
 
-            compiler.compile_release_notes()
+            generator.generate()
 
-        self.assertEqual(compiler.stop_point, "LAST_RELEASE")
+        self.assertEqual(generator.stop_point, "LAST_RELEASE")
 
     def test_get_pull_request_with_api_token(self):
         """Test that a pull request can be accessed using a GitHub API token."""
@@ -668,7 +672,7 @@ class TestReleaseNotesCompiler(unittest.TestCase):
                 status_code=200, json=lambda: {"body": "blah", "commits_url": "https://url/to/commits"}, links={}
             ),
         ) as mock_get:
-            compiler = ReleaseNotesCompiler(
+            generator = PullRequestDescriptionGenerator(
                 stop_point="PULL_REQUEST_START",
                 pull_request_url=pull_request_url,
                 api_token="blah",
@@ -680,15 +684,17 @@ class TestReleaseNotesCompiler(unittest.TestCase):
 
         # Check the commits URL has been requested and the returned JSON added to the pull request JSON.
         self.assertEqual(mock_get.call_args_list[1].args, ("https://url/to/commits?per_page=100",))
-        self.assertIn("commits", compiler.current_pull_request)
+        self.assertIn("commits", generator.current_pull_request)
 
 
 class TestMain(unittest.TestCase):
     def test_cli_with_no_link_to_pull_request(self):
-        """Test that the CLI passes its arguments to the release notes compiler correctly when the
+        """Test that the CLI passes its arguments to the pull request description generator correctly when the
         `--no-link-to-pull-request` flag is present.
         """
-        with patch("generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler") as mock_compiler:
+        with patch(
+            "generate_pull_request_description.generate_pull_request_description.PullRequestDescriptionGenerator"
+        ) as mock_generator:
             main(
                 [
                     "LAST_RELEASE",
@@ -700,7 +706,7 @@ class TestMain(unittest.TestCase):
                 ]
             )
 
-        mock_compiler.assert_called_with(
+        mock_generator.assert_called_with(
             stop_point="LAST_RELEASE",
             pull_request_url="https://github.com/blah/blah/pulls/32",
             api_token="github-token",
@@ -710,10 +716,12 @@ class TestMain(unittest.TestCase):
         )
 
     def test_cli_with_link_to_pull_request(self):
-        """Test that the CLI passes its arguments to the release notes compiler correctly when the
+        """Test that the CLI passes its arguments to the pull request description generator correctly when the
         `--no-link-to-pull-request` flag is absent.
         """
-        with patch("generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler") as mock_compiler:
+        with patch(
+            "generate_pull_request_description.generate_pull_request_description.PullRequestDescriptionGenerator"
+        ) as mock_generator:
             main(
                 [
                     "LAST_RELEASE",
@@ -724,7 +732,7 @@ class TestMain(unittest.TestCase):
                 ]
             )
 
-        mock_compiler.assert_called_with(
+        mock_generator.assert_called_with(
             stop_point="LAST_RELEASE",
             pull_request_url="https://github.com/blah/blah/pulls/32",
             api_token="github-token",
