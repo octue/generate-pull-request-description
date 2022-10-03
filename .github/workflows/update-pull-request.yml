@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: octue/generate-pull-request-description@main
+    - uses: octue/generate-pull-request-description@enhancement/finish-github-action
       with:
         pull_request_url: ${{ github.event.pull_request.url }}
         api_token: ${{ secrets.GITHUB_TOKEN }}
