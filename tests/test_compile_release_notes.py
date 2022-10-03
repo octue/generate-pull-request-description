@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from generate_pull_request_description.compile_release_notes import ReleaseNotesCompiler, main
+from generate_pull_request_description.generate_pull_request_description import ReleaseNotesCompiler, main
 
 
 MOCK_GIT_LOG = [
@@ -44,9 +44,9 @@ EXPECTED_PULL_REQUEST_START_RELEASE_NOTES_WITH_NON_GENERATED_SECTION = "\n".join
 
 
 class TestReleaseNotesCompiler(unittest.TestCase):
-    GIT_LOG_METHOD_PATH = "generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler._get_git_log"
+    GIT_LOG_METHOD_PATH = "generate_pull_request_description.generate_pull_request_description.ReleaseNotesCompiler._get_git_log"
     GET_CURRENT_PULL_REQUEST_PATH = (
-        "generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler._get_current_pull_request"
+        "generate_pull_request_description.generate_pull_request_description.ReleaseNotesCompiler._get_current_pull_request"
     )
     MOCK_PULL_REQUEST_URL = "https://api.github.com/repos/blah/my-repo/pulls/11"
 
@@ -688,7 +688,7 @@ class TestMain(unittest.TestCase):
         """Test that the CLI passes its arguments to the release notes compiler correctly when the
         `--no-link-to-pull-request` flag is present.
         """
-        with patch("generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler") as mock_compiler:
+        with patch("generate_pull_request_description.generate_pull_request_description.ReleaseNotesCompiler") as mock_compiler:
             main(
                 [
                     "LAST_RELEASE",
@@ -713,7 +713,7 @@ class TestMain(unittest.TestCase):
         """Test that the CLI passes its arguments to the release notes compiler correctly when the
         `--no-link-to-pull-request` flag is absent.
         """
-        with patch("generate_pull_request_description.compile_release_notes.ReleaseNotesCompiler") as mock_compiler:
+        with patch("generate_pull_request_description.generate_pull_request_description.ReleaseNotesCompiler") as mock_compiler:
             main(
                 [
                     "LAST_RELEASE",
