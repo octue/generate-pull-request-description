@@ -1,0 +1,48 @@
+# This workflow will install the Python dependencies and run the tests.
+
+name: python-ci
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+
+  check-semantic-version:
+    if: "!contains(github.event.head_commit.message, 'skipci')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Set fetch-depth to 0 to fetch all tags (necessary for git-mkver to determine the correct semantic version).
+          fetch-depth: 0
+      - uses: octue/conventional-commits/check-semantic-version@0.7.0
+        with:
+          version_source_type: setup.py
+
+  tests:
+    if: "!contains(github.event.head_commit.message, 'skipci')"
+    runs-on: ubuntu-latest
+    env:
+      USING_COVERAGE: '3.10'
+    strategy:
+      matrix:
+        python: [3.10]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox
+        run: pip install tox
+      - name: Run tests
+        run: tox
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: coverage.xml
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}

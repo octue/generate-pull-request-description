@@ -1,0 +1,35 @@
+name: build-docker-image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag for Docker image'
+        required: true
+      ref:
+        description: 'Branch, tag, or commit SHA to build from'
+        required: true
+        default: main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3.1.1
+        with:
+          context: ./generate_pull_request_description
+          push: true
+          tags: octue/generate-pull-request-description:${{ github.event.inputs.tag }}
