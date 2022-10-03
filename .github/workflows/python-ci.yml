@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       - uses: octue/conventional-commits/check-semantic-version@0.7.0
         with:
-          version_source_type: setup.py
+          version_source_type: pyproject.toml
 
   tests:
     if: "!contains(github.event.head_commit.message, 'skipci')"
@@ -32,14 +32,21 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Install tox
         run: pip install tox
+
       - name: Run tests
         run: tox
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
