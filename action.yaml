@@ -1,0 +1,29 @@
+name: 'Generate release notes'
+description: "Generate release notes from the Conventional Commits on a pull request branch. You can use this action in conjunction with `riskledger/update-pr-description@v2` to automatically update a pull request's description as commits are pushed."
+author: 'cortadocodes'
+inputs:
+  pull_request_url:
+    description: 'The GitHub API URL for the pull request to generate the release notes from. This can be obtained from the GitHub actions environment.'
+    required: true
+  api_token:
+    description: 'A GitHub API token. This can be obtained from the GitHub actions environment.'
+    required: true
+  header:
+    description: 'The header (including MarkDown styling) to put the release notes under.'
+    required: false
+    default: '# Contents'
+  list_item_symbol:
+    description: 'The MarkDown list item symbol to use for listing commit messages in the release notes.'
+    required: false
+    default: '-'
+outputs:
+  release_notes:
+    description: 'The release notes generated from the Conventional Commits on the pull request branch.'
+runs:
+   using: 'docker'
+   image: 'Dockerfile'
+   args:
+     - ${{ inputs.pull_request_url }}
+     - ${{ inputs.api_token }}
+     - ${{ inputs.header }}
+     - ${{ inputs.list_item_symbol }}
