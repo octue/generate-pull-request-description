@@ -80,6 +80,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3.1.1
         with:
-          context: ./generate_pull_request
+          context: .
           push: true
           tags: octue/generate-pull-request-description:${{ env.PACKAGE_VERSION }},octue/generate-pull-request-description:latest
