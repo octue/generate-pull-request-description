@@ -1,3 +1,8 @@
+[![Release](https://github.com/octue/generate-pull-request-description/actions/workflows/release.yml/badge.svg)](https://github.com/octue/generate-pull-request-description/actions/workflows/release.yml)
+[![codecov](https://codecov.io/gh/octue/generate-pull-request-description/branch/main/graph/badge.svg?token=J3NFSPZJHW)](https://codecov.io/gh/octue/generate-pull-request-description)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 # Pull request description generator
 A GitHub action and command-line tool that generates pull request descriptions from Conventional Commit messages on a
 branch. These descriptions can be used with other GitHub actions to automate release notes.
