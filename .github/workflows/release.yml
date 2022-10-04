@@ -1,4 +1,4 @@
-name: Release the package on merge into main
+name: Release
 
 # Only trigger when a pull request into main branch is closed.
 on:
@@ -25,6 +25,9 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
+      - name: Get package version
+        run: echo "PACKAGE_VERSION=$(poetry version -s)" >> $GITHUB_ENV
+
       - name: Install tox
         run: pip install tox
 
@@ -38,24 +41,21 @@ jobs:
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
+    outputs:
+      package_version: ${{ env.PACKAGE_VERSION }}
+
   release:
     runs-on: ubuntu-latest
     needs: tests
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-
-    - name: Get package version
-      run: echo "PACKAGE_VERSION=$(poetry version -s)" >> $GITHUB_ENV
-
     - name: Create Release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, no need to create your own.
       with:
-        tag_name: ${{ env.PACKAGE_VERSION }}
+        tag_name: ${{ needs.tests.outputs.package_version }}
         release_name: ${{ github.event.pull_request.title }}
         body: ${{ github.event.pull_request.body }}
         draft: false
@@ -63,16 +63,10 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    needs: release
+    needs: [tests, release]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Get package version
-        run: echo "PACKAGE_VERSION=$(poetry version -s)" >> $GITHUB_ENV
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -85,4 +79,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: octue/generate-pull-request-description:${{ env.PACKAGE_VERSION }},octue/generate-pull-request-description:latest
+          tags: octue/generate-pull-request-description:${{ needs.tests.outputs.package_version }},octue/generate-pull-request-description:latest
