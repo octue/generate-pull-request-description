@@ -1,6 +1,9 @@
 name: 'Generate pull request description'
 description: "Dynamically generate the pull request description for a branch from its commit messages."
 author: 'cortadocodes'
+branding:
+  icon: git-pull-request
+  color: green
 inputs:
   pull_request_url:
     description: 'The GitHub API URL for the pull request to generate the release notes from. This can be obtained from the GitHub actions environment.'
