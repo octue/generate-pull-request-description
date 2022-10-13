@@ -1,6 +1,9 @@
-name: 'Generate release notes'
-description: "Generate release notes from the Conventional Commits on a pull request branch. You can use this action in conjunction with `riskledger/update-pr-description@v2` to automatically update a pull request's description as commits are pushed."
+name: 'Generate pull request description'
+description: "Dynamically generate the pull request description for a branch from its commit messages."
 author: 'cortadocodes'
+branding:
+  icon: git-pull-request
+  color: green
 inputs:
   pull_request_url:
     description: 'The GitHub API URL for the pull request to generate the release notes from. This can be obtained from the GitHub actions environment.'
@@ -16,9 +19,13 @@ inputs:
     description: 'The MarkDown list item symbol to use for listing commit messages in the release notes.'
     required: false
     default: '-'
+outputs:
+  pull_request_description:
+    description: 'The generated pull request description.'
+
 runs:
    using: 'docker'
-   image: 'docker://octue/generate-pull-request-description:1.0.0.beta-0'
+   image: 'docker://octue/generate-pull-request-description:1.0.0.beta-2'
    args:
      - ${{ inputs.pull_request_url }}
      - ${{ inputs.api_token }}

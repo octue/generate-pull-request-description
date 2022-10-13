@@ -4,25 +4,28 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 # Pull request description generator
-A GitHub action and command-line tool that generates pull request descriptions from Conventional Commit messages on a
-branch. These descriptions can be used with other GitHub actions to automate release notes.
+A GitHub action that generates pull request descriptions from
+[Conventional Commit messages](https://www.conventionalcommits.org/en/v1.0.0/) on a branch. These descriptions can be
+used with other GitHub actions to automate release notes.
 
-**Features**
+**Features summary**
 - Automatic breaking change highlighting and upgrade instructions
 - Automatic categorisation of all commit messages in the pull request branch
 - Choosing which part of the description to generate, enabling descriptions containing a generated section alongside
-  static/developer-written sections
+  static/user-written sections
 - Easy skipping of description updating when you're ready to fine-tune and edit the description
 
-## GitHub action
-The generator can easily be used as a step in a GitHub workflow alongside the
-[`riskledger/update-pr-description`](https://github.com/riskledger/update-pr-description) action:
+## Usage
+Add the action to pull request workflows alongside the
+[`riskledger/update-pr-description`](https://github.com/riskledger/update-pr-description) action to dynamically update
+the description each time you push:
 
 ```yaml
 steps:
 - uses: actions/checkout@v3
 
-- uses: octue/generate-pull-request-description@1.0.0.beta-0
+- uses: octue/generate-pull-request-description@1.0.0.beta-2
+  id: pr-description
   with:
     pull_request_url: ${{ github.event.pull_request.url }}
     api_token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,35 +33,8 @@ steps:
 - name: Update pull request body
   uses: riskledger/update-pr-description@v2
   with:
-    body: ${{ env.PULL_REQUEST_DESCRIPTION }}
+    body: ${{ steps.pr-description.outputs.pull_request_description }}
     token: ${{ secrets.GITHUB_TOKEN }}
-```
-
-The generated description is available from the environment variable `PULL_REQUEST_DESCRIPTION` instead of as an output
-of the action (`::set-output...` only works with single-line outputs). It's accessible from
-`${{ env.PULL_REQUEST_DESCRIPTION }}` at any point in the workflow job it was used in.
-
-## CLI
-```shell
-usage: generate-pull-request-description [-h] [--pull-request-url PULL_REQUEST_URL] [--api-token API_TOKEN] [--header HEADER] [--list-item-symbol LIST_ITEM_SYMBOL] [--no-link-to-pull-request] {LAST_RELEASE,PULL_REQUEST_START}
-
-positional arguments:
-  {LAST_RELEASE,PULL_REQUEST_START}
-                        The point in the git history to stop compiling commits into the pull request description.
-
-options:
-  -h, --help            show this help message and exit
-  --pull-request-url PULL_REQUEST_URL
-                        Provide the API URL of a pull request (e.g. https://api.github.com/repos/octue/conventional-commits/pulls/1) if you want to update a pull request's description with the generated release notes. It must be
-                        provided alongside --api-token if the repository is private.
-  --api-token API_TOKEN
-                        A valid GitHub API token for the repository the pull request belongs to. There is no need to provide this if the repository is public.
-  --header HEADER       The header (including MarkDown styling) to put the release notes under. Default is '# Contents'
-  --list-item-symbol LIST_ITEM_SYMBOL
-                        The MarkDown list item symbol to use for listing commit messages in the release notes. Default is '- '
-  --no-link-to-pull-request
-                        If provided, don't add a link to the given pull request in the release notes.
-
 ```
 
 ## Features

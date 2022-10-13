@@ -20,6 +20,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - uses: octue/generate-pull-request-description@main
+      id: pull-request-description
       with:
         pull_request_url: ${{ github.event.pull_request.url }}
         api_token: ${{ secrets.GITHUB_TOKEN }}
@@ -27,5 +28,5 @@ jobs:
     - name: Update pull request body
       uses: riskledger/update-pr-description@v2
       with:
-        body: ${{ env.PULL_REQUEST_DESCRIPTION }}
+        body: ${{ steps.pull-request-description.outputs.pull_request_description }}
         token: ${{ secrets.GITHUB_TOKEN }}
