@@ -8,17 +8,17 @@ A GitHub action that generates pull request descriptions from
 [Conventional Commit messages](https://www.conventionalcommits.org/en/v1.0.0/) on a branch. These descriptions can be
 used with other GitHub actions to automate release notes.
 
-**Features**
+**Features summary**
 - Automatic breaking change highlighting and upgrade instructions
 - Automatic categorisation of all commit messages in the pull request branch
 - Choosing which part of the description to generate, enabling descriptions containing a generated section alongside
-  static/developer-written sections
+  static/user-written sections
 - Easy skipping of description updating when you're ready to fine-tune and edit the description
 
-## GitHub action
-The action can be used as a step in a GitHub workflow alongside the
+## Usage
+Add the action to pull request workflows alongside the
 [`riskledger/update-pr-description`](https://github.com/riskledger/update-pr-description) action to dynamically update
-your pull request description commit by commit:
+the description each time you push:
 
 ```yaml
 steps:
