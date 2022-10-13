@@ -24,7 +24,7 @@ your pull request description commit by commit:
 steps:
 - uses: actions/checkout@v3
 
-- uses: octue/generate-pull-request-description@1.0.0.beta-1
+- uses: octue/generate-pull-request-description@1.0.0.beta-2
   id: pr-description
   with:
     pull_request_url: ${{ github.event.pull_request.url }}
