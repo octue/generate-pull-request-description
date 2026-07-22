@@ -686,6 +686,25 @@ class TestPullRequestDescriptionGenerator(unittest.TestCase):
         self.assertEqual(mock_get.call_args_list[1].args, ("https://url/to/commits?per_page=100",))
         self.assertIn("commits", generator.current_pull_request)
 
+    def test_get_pull_request_commits_uses_api_token_for_all_pages(self):
+        """Test that every page of a paginated pull request commits response is requested with the API token."""
+        headers = {"Authorization": "token blah"}
+
+        first_page = Mock(links={"next": {"url": "https://url/to/commits?per_page=100&page=2"}})
+        first_page.json = lambda: MOCK_PULL_REQUEST_COMMITS[:2]
+        second_page = Mock(links={})
+        second_page.json = lambda: MOCK_PULL_REQUEST_COMMITS[2:]
+
+        generator = PullRequestDescriptionGenerator(stop_point="LAST_RELEASE")
+
+        with patch("requests.get", side_effect=[first_page, second_page]) as mock_get:
+            commits = generator._get_pull_request_commits({"commits_url": "https://url/to/commits"}, headers)
+
+        self.assertEqual(commits, MOCK_PULL_REQUEST_COMMITS)
+        self.assertEqual(mock_get.call_args_list[0].kwargs, {"headers": headers})
+        self.assertEqual(mock_get.call_args_list[1].args, ("https://url/to/commits?per_page=100&page=2",))
+        self.assertEqual(mock_get.call_args_list[1].kwargs, {"headers": headers})
+
 
 class TestMain(unittest.TestCase):
     def test_cli_with_no_link_to_pull_request(self):
