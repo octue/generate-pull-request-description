@@ -180,7 +180,7 @@ class PullRequestDescriptionGenerator:
         commits.extend(response.json())
 
         while "next" in response.links:
-            response = requests.get(response.links["next"]["url"])
+            response = requests.get(response.links["next"]["url"], headers=headers)
             commits.extend(response.json())
 
         return commits
